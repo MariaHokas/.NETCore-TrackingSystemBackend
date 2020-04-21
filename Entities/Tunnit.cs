@@ -9,9 +9,7 @@ namespace timeTrackingSystemBackend.Entities
         public string LuokkahuoneId { get; set; }
         public DateTime? Sisaan { get; set; }
         public DateTime? Ulos { get; set; }
-        public int? OppilasId { get; set; }
+        public string OppilasId { get; set; }
         public int? UserId { get; set; }
-
-        public virtual Users Oppilas { get; set; }
     }
 }
