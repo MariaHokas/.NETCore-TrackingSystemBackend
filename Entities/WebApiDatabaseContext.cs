@@ -15,6 +15,7 @@ namespace timeTrackingSystemBackend.Entities
         {
         }
 
+        public virtual DbSet<Luokat> Luokat { get; set; }
         public virtual DbSet<Tunnit> Tunnit { get; set; }
         public virtual DbSet<Users> Users { get; set; }
 
@@ -29,6 +30,17 @@ namespace timeTrackingSystemBackend.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Luokat>(entity =>
+            {
+                entity.HasKey(e => e.LuokkahuoneId);
+
+                entity.Property(e => e.LuokkahuoneId).HasColumnName("LuokkahuoneID");
+
+                entity.Property(e => e.LuokkaNimi)
+                    .HasMaxLength(10)
+                    .IsFixedLength();
+            });
+
             modelBuilder.Entity<Tunnit>(entity =>
             {
                 entity.ToTable("tunnit");
@@ -41,7 +53,8 @@ namespace timeTrackingSystemBackend.Entities
                 entity.Property(e => e.LuokkahuoneId)
                     .IsRequired()
                     .HasColumnName("LuokkahuoneID")
-                    .HasMaxLength(4);
+                    .HasMaxLength(10)
+                    .IsFixedLength();
 
                 entity.Property(e => e.OppilasId).HasColumnName("OppilasID");
 

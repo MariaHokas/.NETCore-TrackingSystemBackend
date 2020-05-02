@@ -1,10 +1,14 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +33,14 @@ namespace timeTrackingSystemBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("fi-FI");
+                options.SupportedCultures = new List<CultureInfo> { new CultureInfo("fi-FI") };
+                options.RequestCultureProviders.Clear();
+            });
+
             // use sql server db in production and sqlite db in development
             if (_env.IsProduction())
                 services.AddDbContext<DataContext>();
@@ -38,6 +50,8 @@ namespace timeTrackingSystemBackend
             services.AddCors();
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddMvc();
+
 
             // configure strongly typed settings objects
             var appSettingsSection = _configuration.GetSection("AppSettings");
@@ -97,6 +111,7 @@ namespace timeTrackingSystemBackend
                 .AllowAnyMethod()
                 .AllowAnyHeader());
 
+            app.UseRequestLocalization();
             app.UseAuthentication();
             app.UseAuthorization();
 
