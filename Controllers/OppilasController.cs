@@ -36,7 +36,6 @@ namespace timeTrackingSystemBackend.Controllers
                     LuokkahuoneId = tunti.LuokkahuoneId,
                     OppilasId = tunti.OppilasId,
                     UserId = tunti.UserId,
-                    Numero = tunti.Numero,
                     Sisaan = DateTime.Now,
                 };
 
@@ -101,14 +100,14 @@ namespace timeTrackingSystemBackend.Controllers
 
         public IActionResult GetSomeTunnit(int offset, int limit, string oppilasid)
         {
-            if (oppilasid != null)
-            {
-                WebApiDatabaseContext db = new WebApiDatabaseContext();
-                List<Tunnit> leimaukset = db.Tunnit.Where(d => d.OppilasId == oppilasid).ToList();
-                return Ok(leimaukset);
-            }
+            //if (oppilasid != null)
+            //{
+            //    WebApiDatabaseContext db = new WebApiDatabaseContext();
+            //    List<Tunnit> leimaukset = db.Tunnit.Where(d => d.OppilasId == oppilasid).ToList();
+            //    return Ok(leimaukset);
+            //}
 
-            else
+            //else
             {
                 WebApiDatabaseContext db = new WebApiDatabaseContext();
                 var model = (from c in db.Tunnit
