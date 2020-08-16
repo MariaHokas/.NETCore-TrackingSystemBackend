@@ -24,7 +24,7 @@ namespace timeTrackingSystemBackend.Entities
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=DESKTOP-35CADGH\\SQLEMA;Database=WebApiDatabase;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer("Server=tcp:marianlopputyo.database.windows.net,1433;Initial Catalog=WebApiDatabase;Persist Security Info=False;User ID=marianlopputyo;Password=Perhonen1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
             }
         }
 
@@ -37,7 +37,7 @@ namespace timeTrackingSystemBackend.Entities
                 entity.Property(e => e.LuokkahuoneId).HasColumnName("LuokkahuoneID");
 
                 entity.Property(e => e.LuokkaNimi)
-                    .HasMaxLength(10)
+                    .HasMaxLength(50)
                     .IsFixedLength();
             });
 
@@ -56,18 +56,16 @@ namespace timeTrackingSystemBackend.Entities
                     .HasMaxLength(10)
                     .IsFixedLength();
 
-                entity.Property(e => e.OppilasId).HasColumnName("OppilasID");
+                entity.Property(e => e.OppilasId)
+                    .HasColumnName("OppilasID")
+                    .HasMaxLength(10)
+                    .IsFixedLength();
 
                 entity.Property(e => e.Sisaan).HasColumnType("datetime");
 
                 entity.Property(e => e.Ulos).HasColumnType("datetime");
 
                 entity.Property(e => e.UserId).HasColumnName("UserID");
-
-                entity.HasOne(d => d.Oppilas)
-                    .WithMany(p => p.Tunnit)
-                    .HasForeignKey(d => d.OppilasId)
-                    .HasConstraintName("FK_tunnit_Users");
             });
 
             modelBuilder.Entity<Users>(entity =>

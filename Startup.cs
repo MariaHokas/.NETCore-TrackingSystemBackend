@@ -36,9 +36,6 @@ namespace timeTrackingSystemBackend
 
             services.Configure<RequestLocalizationOptions>(options =>
             {
-                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("fi-FI");
-                options.SupportedCultures = new List<CultureInfo> { new CultureInfo("fi-FI") };
-                options.RequestCultureProviders.Clear();
             });
 
             // use sql server db in production and sqlite db in development
