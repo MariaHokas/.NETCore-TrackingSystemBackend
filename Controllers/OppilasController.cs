@@ -98,34 +98,24 @@ namespace timeTrackingSystemBackend.Controllers
         [HttpGet]
         [Route("R")]
 
-        public IActionResult GetSomeTunnit(int offset, int limit, string oppilasid)
+        public IActionResult GetSomeTunnit()
         {
-            //if (oppilasid != null)
-            //{
-            //    WebApiDatabaseContext db = new WebApiDatabaseContext();
-            //    List<Tunnit> leimaukset = db.Tunnit.Where(d => d.OppilasId == oppilasid).ToList();
-            //    return Ok(leimaukset);
-            //}
-
-            //else
-            {
-                WebApiDatabaseContext db = new WebApiDatabaseContext();
-                var model = (from c in db.Tunnit
-                             join au in db.Users on c.UserId equals au.Id
-                             join l in db.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
-                             orderby c.TunnitId descending
-                             select new
-                             {
-                                 c.TunnitId,
-                                 LuokkahuoneNimi = l.LuokkaNimi,
-                                 c.Sisaan,
-                                 c.Ulos,
-                                 c.UserId,
-                                 OppilasName = au.FirstName + " " + au.LastName,
-                             }).Skip(offset).Take(limit).ToList();
-
-                return Ok(model);
-            }
+            WebApiDatabaseContext db = new WebApiDatabaseContext();
+            var model = (from c in db.Tunnit
+                         join au in db.Users on c.UserId equals au.Id
+                         join l in db.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
+                         orderby c.TunnitId descending
+                         select new
+                         {
+                             c.TunnitId,
+                             c.LuokkahuoneId,
+                             LuokkahuoneNimi = l.LuokkaNimi,
+                             c.Sisaan,
+                             c.Ulos,
+                             c.UserId,
+                             OppilasName = au.FirstName + " " + au.LastName,
+                         }).ToList();
+            return Ok(model);
         }
     }
 }
