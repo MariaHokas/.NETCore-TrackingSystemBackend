@@ -12,5 +12,6 @@ namespace timeTrackingSystemBackend.Entities
         public string OppilasId { get; set; }
         public int? UserId { get; set; }
         public int? Numero { get; set; }
+        public bool? Tarkastettu { get; set; }
     }
 }

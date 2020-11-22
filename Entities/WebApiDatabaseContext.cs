@@ -70,9 +70,7 @@ namespace timeTrackingSystemBackend.Entities
 
             modelBuilder.Entity<Users>(entity =>
             {
-                entity.Property(e => e.Id)
-                    .HasColumnName("ID")
-                    .ValueGeneratedNever();
+                entity.Property(e => e.Id).HasColumnName("ID");
             });
 
             OnModelCreatingPartial(modelBuilder);

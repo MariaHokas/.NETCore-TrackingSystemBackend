@@ -22,6 +22,45 @@ namespace timeTrackingSystemBackend.Controllers
 
         // POST: api/Leimaus
         [HttpPost]
+        [Route("add")]
+        public ActionResult PostTunti([FromBody] Tunnit tunti)
+        {
+
+            WebApiDatabaseContext db = new WebApiDatabaseContext();
+            try
+            {
+                Tunnit dbItem = new Tunnit()
+
+                {
+                    TunnitId = tunti.TunnitId,
+                    LuokkahuoneId = tunti.LuokkahuoneId,
+                    UserId = tunti.UserId,
+                    Sisaan = tunti.Sisaan,
+                    Ulos = tunti.Ulos,
+                    Tarkastettu = false
+                };
+
+                _ = db.Tunnit.Add(dbItem);
+                _ = db.SaveChanges();
+
+                return Ok(dbItem.TunnitId);
+            }
+
+            catch (Exception)
+            {
+                return BadRequest("Jokin meni pieleen leimausta lisättäessä!?!?");
+            }
+
+            finally
+            {
+
+                db.Dispose();
+            }
+
+        }
+
+        // POST: api/Leimaus
+        [HttpPost]
         [Route("sisaan")]
         public ActionResult PostSisaan([FromBody] Tunnit tunti)
         {
@@ -37,12 +76,14 @@ namespace timeTrackingSystemBackend.Controllers
                     OppilasId = tunti.OppilasId,
                     UserId = tunti.UserId,
                     Sisaan = DateTime.Now,
+                    Tarkastettu = true
                 };
 
-
-                _ = db.Tunnit.Add(dbItem);
-                _ = db.SaveChanges();
-
+                if (tunti.LuokkahuoneId == "1" || tunti.LuokkahuoneId == "2" || tunti.LuokkahuoneId == "3")
+                {
+                    _ = db.Tunnit.Add(dbItem);
+                    _ = db.SaveChanges();               
+                }
                 return Ok(dbItem.TunnitId);
             }
             catch (Exception)
@@ -52,11 +93,8 @@ namespace timeTrackingSystemBackend.Controllers
 
             finally
             {
-
                 db.Dispose();
-            }
-
-            /*return doku.DocumentationId.ToString; //k*//*uittaus Frontille, että päivitys meni oikein --> Frontti voi tsekata, että kontrolleri palauttaa saman id:n mitä käsitteli*/
+            }        
         }
 
         // POST: api/Leimaus
@@ -75,7 +113,9 @@ namespace timeTrackingSystemBackend.Controllers
                                  select p).First();
                 {
                     dbItem.Ulos = DateTime.Now;
-                    _ = db.SaveChanges();
+
+                    if (tunti.LuokkahuoneId == "1" || tunti.LuokkahuoneId == "2" || tunti.LuokkahuoneId == "3")
+                        _ = db.SaveChanges();
 
                     return Ok(dbItem.TunnitId);
                 }
@@ -91,31 +131,54 @@ namespace timeTrackingSystemBackend.Controllers
 
                 db.Dispose();
             }
-
-            /*return doku.DocumentationId.ToString; //k*//*uittaus Frontille, että päivitys meni oikein --> Frontti voi tsekata, että kontrolleri palauttaa saman id:n mitä käsitteli*/
         }
 
         [HttpGet]
         [Route("R")]
 
-        public IActionResult GetSomeTunnit()
+        public IActionResult GetTunnit(bool approvalStatus)
         {
-            WebApiDatabaseContext db = new WebApiDatabaseContext();
-            var model = (from c in db.Tunnit
-                         join au in db.Users on c.UserId equals au.Id
-                         join l in db.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
-                         orderby c.TunnitId descending
-                         select new
-                         {
-                             c.TunnitId,
-                             c.LuokkahuoneId,
-                             LuokkahuoneNimi = l.LuokkaNimi,
-                             c.Sisaan,
-                             c.Ulos,
-                             c.UserId,
-                             OppilasName = au.FirstName + " " + au.LastName,
-                         }).ToList();
-            return Ok(model);
+            if (approvalStatus == true)
+            {
+                WebApiDatabaseContext db = new WebApiDatabaseContext();
+                var model = (from c in db.Tunnit
+                             join au in db.Users on c.UserId equals au.Id
+                             join l in db.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
+                             where c.Tarkastettu == false || c.Tarkastettu == null
+                             orderby c.TunnitId descending
+                             select new
+                             {
+                                 c.TunnitId,
+                                 c.LuokkahuoneId,
+                                 LuokkahuoneNimi = l.LuokkaNimi,
+                                 c.Sisaan,
+                                 c.Ulos,
+                                 c.UserId,
+                                 OppilasName = au.FirstName + " " + au.LastName,
+                             }).ToList();
+                return Ok(model);
+            }
+            else
+            {
+                WebApiDatabaseContext dt = new WebApiDatabaseContext();
+                var model2 = (from c in dt.Tunnit
+                             join au in dt.Users on c.UserId equals au.Id
+                             join l in dt.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
+                             where c.Tarkastettu == true
+                             orderby c.TunnitId descending
+                             select new
+                             {
+                                 c.TunnitId,
+                                 c.LuokkahuoneId,
+                                 LuokkahuoneNimi = l.LuokkaNimi,
+                                 c.Sisaan,
+                                 c.Ulos,
+                                 c.UserId,
+                                 OppilasName = au.FirstName + " " + au.LastName,
+                             }).ToList();
+                return Ok(model2);
+            }
+            
         }
     }
 }

@@ -36,6 +36,7 @@ namespace timeTrackingSystemBackend.Controllers
                     UserId = tunti.UserId,
                     Sisaan = tunti.Sisaan,
                     Ulos = tunti.Ulos,
+                    Tarkastettu = true
                 };
 
                 _ = db.Tunnit.Add(dbItem);
@@ -55,8 +56,40 @@ namespace timeTrackingSystemBackend.Controllers
                 db.Dispose();
             }
 
-            /*return doku.DocumentationId.ToString; //k*//*uittaus Frontille, että päivitys meni oikein --> Frontti voi tsekata, että kontrolleri palauttaa saman id:n mitä käsitteli*/
         }
+
+        // POST: api/approve
+        [HttpPost]
+        [Route("op/{key}")]
+        public ActionResult ApproveStudentTimestamp(int key)
+        {
+            WebApiDatabaseContext db = new WebApiDatabaseContext();
+            try
+            {
+                Tunnit dbItem = (from p in db.Tunnit
+                                 where p.TunnitId == key
+                                 select p).First();
+                {
+                    dbItem.TunnitId = key;
+                    dbItem.Tarkastettu = true;
+                        _ = db.SaveChanges();
+
+                    return Ok(dbItem.TunnitId);
+                }
+            }
+
+            catch (Exception)
+            {
+                return BadRequest("Jokin meni pieleen leimausta lisättäessä!?!?");
+            }
+
+            finally
+            {
+                db.Dispose();
+            }
+        }
+
+
 
         [HttpPut]
         [Route("{key}")]
@@ -110,7 +143,26 @@ namespace timeTrackingSystemBackend.Controllers
                 return NotFound("tuntita " + key + " ei löydy");
             }
         }
-
+        public void testiMetodi()
+        {
+            WebApiDatabaseContext webdb = new WebApiDatabaseContext();
+            var modelNoLimits = (from c in webdb.Tunnit
+                                 join au in webdb.Users on c.UserId equals au.Id
+                                 join l in webdb.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
+                                 orderby c.TunnitId descending
+                                 where c.Tarkastettu == true
+                                 select new
+                                 {
+                                     c.TunnitId,
+                                     c.LuokkahuoneId,
+                                     LuokkahuoneNimi = l.LuokkaNimi,
+                                     c.Sisaan,
+                                     c.Ulos,
+                                     c.UserId,
+                                     OppilasName = au.FirstName + " " + au.LastName,
+                                }).ToList();
+           
+        }
         [HttpGet]
         [Route("R")]
 
@@ -125,13 +177,14 @@ namespace timeTrackingSystemBackend.Controllers
 
             else 
             {
-                if (limit > 10)
+                if (limit == 10)
                 {
                     WebApiDatabaseContext webdb = new WebApiDatabaseContext();
                     var modelNoLimits = (from c in webdb.Tunnit
                                  join au in webdb.Users on c.UserId equals au.Id
                                  join l in webdb.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
                                  orderby c.TunnitId descending
+                                 where c.Tarkastettu == true
                                  select new
                                  {
                                      c.TunnitId,
@@ -144,12 +197,34 @@ namespace timeTrackingSystemBackend.Controllers
                                  }).ToList();
                     return Ok(modelNoLimits);
                 }
+                else if (limit == 11)
+                {
+                    WebApiDatabaseContext tb = new WebApiDatabaseContext();
+                    var sentByOppilas = (from c in tb.Tunnit
+                                 join au in tb.Users on c.UserId equals au.Id
+                                 join l in tb.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
+                                 orderby c.TunnitId descending
+                                 where c.Tarkastettu == false || c.Tarkastettu == null
+                                         select new
+                                 {
+                                     c.TunnitId,
+                                     c.LuokkahuoneId,
+                                     LuokkahuoneNimi = l.LuokkaNimi,
+                                     c.Sisaan,
+                                     c.Ulos,
+                                     c.UserId,
+                                     OppilasName = au.FirstName + " " + au.LastName,
+                                 }).ToList();
+                    return Ok(sentByOppilas);
 
+                }
+                else { 
                 WebApiDatabaseContext db = new WebApiDatabaseContext();
                 var model = (from c in db.Tunnit
                              join au in db.Users on c.UserId equals au.Id
                              join l in db.Luokat on c.LuokkahuoneId equals l.LuokkahuoneId.ToString()
                              orderby c.TunnitId descending
+                             where c.Tarkastettu == true
                              select new
                              {
                                  c.TunnitId,
@@ -160,7 +235,8 @@ namespace timeTrackingSystemBackend.Controllers
                                  c.UserId,
                                  OppilasName = au.FirstName + " " + au.LastName,
                              }).Skip(offset).Take(limit).ToList();
-                    return Ok(model);            
+                    return Ok(model);
+                }
             }
         }
     }
